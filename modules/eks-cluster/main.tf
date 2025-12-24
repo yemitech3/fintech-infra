@@ -83,8 +83,8 @@ module "eks" {
     ami_type       = "AL2023_x86_64_STANDARD"
     instance_types = ["t3.medium"]
 
-    min_size     = 3
-    max_size     = 5
+    min_size     = 5
+    max_size     = 7
     desired_size = 3
 
     iam_role_additional_policies = {
