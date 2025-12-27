@@ -83,9 +83,9 @@ module "eks" {
     ami_type       = "AL2023_x86_64_STANDARD"
     instance_types = ["t3.medium"]
 
-    min_size     = 5
-    max_size     = 7
-    desired_size = 3
+    min_size     = 4
+    max_size     = 6
+    desired_size = 4
 
     iam_role_additional_policies = {
       AmazonEKSWorkerNodePolicy          = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
