@@ -24,6 +24,6 @@ variable "oidc_provider_arn" {
 
 variable "account_id" {
   description = "aws account"
-  default     = 418272782718
+  default     = 043310666010
 
 }
