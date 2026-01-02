@@ -1,7 +1,7 @@
 variable "ami_id" {
   description = "The AMI ID for the Terraform node. Leave empty to automatically fetch the latest Ubuntu AMI."
   type        = string
-  default     = "ami-0cfde0ea8edd312d4"
+  default     = "ami-0f5fcdfbd140e4ab7"
 }
 
 variable "instance_type" {
