@@ -107,7 +107,7 @@ module "eks" {
   access_entries = {
     fusi = {
       kubernetes_groups = ["eks-admins"]
-      principal_arn     = "arn:aws:iam::999568710647:user/nfusi"
+      principal_arn     = "arn:aws:iam::327019199684:user/nfusi"
       policy_associations = [
         {
           policy_arn  = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
@@ -118,7 +118,7 @@ module "eks" {
 
     github_runner = {
       kubernetes_groups = ["eks-admins"]
-      principal_arn     = "arn:aws:iam::999568710647:role/github-runner-ssm-role"
+      principal_arn     = "arn:aws:iam::327019199684:role/github-runner-ssm-role"
       policy_associations = [
         {
           policy_arn  = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
