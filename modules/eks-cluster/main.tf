@@ -1,5 +1,5 @@
 ##############################################
-# EKS Data + Auth
+# EKS Data + Auth (Do not edit this page)
 ##############################################
 
 data "aws_eks_cluster_auth" "main" {
@@ -105,8 +105,9 @@ module "eks" {
   # Access entries (IAM Identity Center or user/role mapping)
   ##############################################
   access_entries = {
-    yemi = {
-      principal_arn = "arn:aws:iam::043310666010:user/ope1"
+    fusi = {
+      kubernetes_groups = ["eks-admins"]
+      principal_arn     = "arn:aws:iam::999568710647:user/nfusi"
       policy_associations = [
         {
           policy_arn  = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
@@ -117,7 +118,7 @@ module "eks" {
 
     github_runner = {
       kubernetes_groups = ["eks-admins"]
-      principal_arn     = "arn:aws:iam::043310666010:role/github-runner-ssm-role"
+      principal_arn     = "arn:aws:iam::999568710647:role/github-runner-ssm-role"
       policy_associations = [
         {
           policy_arn  = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
