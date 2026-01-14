@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "us-west-1"
+  region = "us-east-2"
 }
 
 resource "aws_acm_certificate" "greathonour_cert" {
