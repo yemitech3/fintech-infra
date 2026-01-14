@@ -7,7 +7,7 @@ variable "aws_account_id" {
 variable "aws_region" {
   description = "AWS Region"
   type        = string
-  default     = "us-east-2"
+  default     = "us-west-1"
 }
 
 variable "environment" {
@@ -21,7 +21,7 @@ variable "cluster_name" {
 }
 
 variable "eks_oidc_provider" {
-  description = "EKS OIDC provider (e.g. oidc.eks.us-east-2.amazonaws.com/id/EXAMPLED539D4633E53DE1B716D3041E)"
+  description = "EKS OIDC provider (e.g. oidc.eks.us-west-1.amazonaws.com/id/EXAMPLED539D4633E53DE1B716D3041E)"
   type        = string
 }
 
