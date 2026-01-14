@@ -20,7 +20,7 @@ on:
       region:
         description: "AWS Region"
         required: true
-        default: "us-east-2"
+        default: "us-west-1"
       action:
         description: "Terraform action: apply (default) or destroy"
         required: false
@@ -36,7 +36,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TF_ENV: ${{ github.event.inputs.environment || 'prod' }}
-      AWS_REGION: ${{ github.event.inputs.region || 'us-east-2' }}
+      AWS_REGION: ${{ github.event.inputs.region || 'us-west-1' }}
       TF_DIR: ${{ github.event.inputs.environment || 'prod' }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -78,7 +78,7 @@ jobs:
     needs: approve
     env:
       TF_ENV: ${{ github.event.inputs.environment || 'prod' }}
-      AWS_REGION: ${{ github.event.inputs.region || 'us-east-2' }}
+      AWS_REGION: ${{ github.event.inputs.region || 'us-west-1' }}
       TF_DIR: ${{ github.event.inputs.environment || 'prod' }}
       AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
       AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
