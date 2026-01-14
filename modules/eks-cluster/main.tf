@@ -48,7 +48,8 @@ module "eks" {
   cluster_name    = var.cluster_name
   cluster_version = "1.32"
 
-  # Crucial for your access
+  # ✅ THIS PROVIDES ADMIN ACCESS TO OPE1 AUTOMATICALLY
+  # This prevents the 409 Conflict Error you saw earlier.
   enable_cluster_creator_admin_permissions = true
   cluster_endpoint_public_access           = true
 
@@ -100,18 +101,8 @@ module "eks" {
   }
 
   access_entries = {
-    # UPDATED: Your primary user
-    ope1 = {
-      kubernetes_groups = ["eks-admins"]
-      principal_arn     = "arn:aws:iam::043310666010:user/ope1"
-      policy_associations = [
-        {
-          policy_arn    = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSClusterAdminPolicy"
-          access_scope  = { type = "cluster" }
-        }
-      ]
-    }
-    # Keep the runner for CI/CD
+    # ✅ We only define ADDITIONAL identities here.
+    # Your user (ope1) is already handled by the creator toggle above.
     github_runner = {
       kubernetes_groups = ["eks-admins"]
       principal_arn     = "arn:aws:iam::043310666010:role/github-runner-ssm-role"
