@@ -1,7 +1,6 @@
 ################################################################################
 # 1. PROVIDERS & DATA
 ################################################################################
-
 provider "aws" {
   region = "us-east-1" 
 }
@@ -21,9 +20,8 @@ provider "kubernetes" {
 }
 
 ################################################################################
-# 2. STORAGE PERMISSIONS (EBS CSI DRIVER)
+# 2. STORAGE ROLE (EBS CSI)
 ################################################################################
-
 module "ebs_csi_irsa_role" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
   version = "~> 5.0"
@@ -42,15 +40,16 @@ module "ebs_csi_irsa_role" {
 ################################################################################
 # 3. EKS CLUSTER
 ################################################################################
-
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "~> 20.0"
 
+  # ⚠️ MAKE SURE var.cluster_name IS SET TO A NEW NAME (e.g., fintech-eks-v2)
   cluster_name    = var.cluster_name
   cluster_version = "1.32"
 
-  # ✅ This automatically creates the Access Entry for ope1
+  # ✅ This handles 'ope1' automatically. 
+  # DO NOT add 'ope1' to access_entries below.
   enable_cluster_creator_admin_permissions = true
   cluster_endpoint_public_access           = true
 
@@ -75,14 +74,15 @@ module "eks" {
   }
 
   eks_managed_node_groups = {
-    default_node_group = {
+    main = {
       min_size     = 3
       max_size     = 5
       desired_size = 3
     }
   }
 
-  # ✅ ACCESS ENTRIES - ope1 removed to avoid 409 error
+  # ✅ Only define the Runner here. 
+  # Your 'ope1' user is already handled by enable_cluster_creator_admin_permissions
   access_entries = {
     github_runner = {
       principal_arn     = "arn:aws:iam::043310666010:role/github-runner-ssm-role"
@@ -94,17 +94,11 @@ module "eks" {
       ]
     }
   }
-
-  tags = {
-    Environment = "production"
-    Owner       = "ope1"
-  }
 }
 
 ################################################################################
 # 4. KUBERNETES RESOURCES
 ################################################################################
-
 resource "kubernetes_namespace" "namespaces" {
   for_each = toset(["fintech", "monitoring", "fintech-dev"])
   metadata {
