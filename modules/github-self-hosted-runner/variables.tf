@@ -19,7 +19,7 @@ variable "key_name" {
 variable "main_region" {
   description = "The AWS region to deploy resources"
   type        = string
-  default     = "us-west-1"
+  default     = "us-east-2"
 }
 
 variable "security_group_id" {
@@ -40,7 +40,8 @@ variable "cluster_name" {
 variable "aws_region" {
   description = "The AWS region to deploy resources"
   type        = string
-  default     = "us-west-1"
+  default     = "us-east-2"
 }
+
 
 
