@@ -50,8 +50,7 @@ module "eks" {
   cluster_name    = var.cluster_name
   cluster_version = "1.32"
 
-  # ✅ WE SET THIS TO TRUE
-  # The module will automatically create 'this["cluster_creator"]' for ope1.
+  # ✅ This automatically creates the Access Entry for ope1
   enable_cluster_creator_admin_permissions = true
   cluster_endpoint_public_access           = true
 
@@ -83,11 +82,8 @@ module "eks" {
     }
   }
 
-  # ✅ ACCESS ENTRIES - OPE1 REMOVED
+  # ✅ ACCESS ENTRIES - ope1 removed to avoid 409 error
   access_entries = {
-    # We removed 'ope1' because 'enable_cluster_creator_admin_permissions = true' 
-    # handles it automatically as shown in your error log.
-    
     github_runner = {
       principal_arn     = "arn:aws:iam::043310666010:role/github-runner-ssm-role"
       policy_associations = [
