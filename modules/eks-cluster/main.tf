@@ -1,12 +1,14 @@
-##############################################
-# EKS Data + Auth
-##############################################
+################################################################################
+# 1. PROVIDERS & DATA
+################################################################################
+
+provider "aws" {
+  region = "us-east-1" 
+}
 
 data "aws_eks_cluster_auth" "main" {
   name = module.eks.cluster_name
 }
-
-data "aws_caller_identity" "current" {}
 
 provider "kubernetes" {
   host                   = module.eks.cluster_endpoint
@@ -18,9 +20,9 @@ provider "kubernetes" {
   }
 }
 
-##############################################
-# EBS CSI Driver IAM Role (Required for Storage)
-##############################################
+################################################################################
+# 2. STORAGE PERMISSIONS (EBS CSI DRIVER)
+################################################################################
 
 module "ebs_csi_irsa_role" {
   source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
@@ -37,9 +39,9 @@ module "ebs_csi_irsa_role" {
   }
 }
 
-##############################################
-# EKS Control Plane + Node Groups
-##############################################
+################################################################################
+# 3. EKS CLUSTER
+################################################################################
 
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
@@ -48,8 +50,8 @@ module "eks" {
   cluster_name    = var.cluster_name
   cluster_version = "1.32"
 
-  # ✅ THIS PROVIDES ADMIN ACCESS TO OPE1 AUTOMATICALLY
-  # This prevents the 409 Conflict Error you saw earlier.
+  # ✅ WE SET THIS TO TRUE
+  # The module will automatically create 'this["cluster_creator"]' for ope1.
   enable_cluster_creator_admin_permissions = true
   cluster_endpoint_public_access           = true
 
@@ -57,54 +59,36 @@ module "eks" {
   subnet_ids               = var.private_subnets
   control_plane_subnet_ids = var.private_subnets
 
-  cluster_additional_security_group_ids = var.security_group_ids
-
-  create_cloudwatch_log_group = true
-  cluster_enabled_log_types   = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
-
   cluster_addons = {
-    vpc-cni = {
-      most_recent              = true
-      service_account_role_arn = var.cni_role_arn
-      resolve_conflicts        = "OVERWRITE"
-    }
-    coredns = {
-      most_recent       = true
-      resolve_conflicts = "OVERWRITE"
-    }
-    kube-proxy = {
-      most_recent       = true
-      resolve_conflicts = "OVERWRITE"
-    }
-    eks-pod-identity-agent = {
-      most_recent       = true
-      resolve_conflicts = "OVERWRITE"
-    }
+    vpc-cni                = { most_recent = true }
+    coredns                = { most_recent = true }
+    kube-proxy             = { most_recent = true }
+    eks-pod-identity-agent = { most_recent = true }
     aws-ebs-csi-driver = {
       most_recent              = true
       service_account_role_arn = module.ebs_csi_irsa_role.iam_role_arn
-      resolve_conflicts        = "OVERWRITE"
     }
   }
 
   eks_managed_node_group_defaults = {
     ami_type       = "AL2023_x86_64_STANDARD"
     instance_types = ["t3.medium"]
-
-    min_size     = 3
-    max_size     = 5
-    desired_size = 3
   }
 
   eks_managed_node_groups = {
-    eks-node-group-1 = {}
+    default_node_group = {
+      min_size     = 3
+      max_size     = 5
+      desired_size = 3
+    }
   }
 
+  # ✅ ACCESS ENTRIES - OPE1 REMOVED
   access_entries = {
-    # ✅ We only define ADDITIONAL identities here.
-    # Your user (ope1) is already handled by the creator toggle above.
+    # We removed 'ope1' because 'enable_cluster_creator_admin_permissions = true' 
+    # handles it automatically as shown in your error log.
+    
     github_runner = {
-      kubernetes_groups = ["eks-admins"]
       principal_arn     = "arn:aws:iam::043310666010:role/github-runner-ssm-role"
       policy_associations = [
         {
@@ -115,33 +99,20 @@ module "eks" {
     }
   }
 
-  tags = local.common_tags
+  tags = {
+    Environment = "production"
+    Owner       = "ope1"
+  }
 }
 
-##############################################
-# RBAC Bindings & Namespaces
-##############################################
+################################################################################
+# 4. KUBERNETES RESOURCES
+################################################################################
 
-resource "kubernetes_cluster_role_binding" "eks_admins_binding" {
-  metadata { name = "eks-admins-binding" }
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "ClusterRole"
-    name      = "cluster-admin"
-  }
-  subject {
-    kind      = "Group"
-    name      = "eks-admins"
-    api_group = "rbac.authorization.k8s.io"
-  }
-  depends_on = [module.eks]
-}
-
-resource "kubernetes_namespace" "apps" {
+resource "kubernetes_namespace" "namespaces" {
   for_each = toset(["fintech", "monitoring", "fintech-dev"])
   metadata {
     name = each.key
-    labels = { app = each.key }
   }
   depends_on = [module.eks]
 }
